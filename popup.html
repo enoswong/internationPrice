@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Currency Converter</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        h3 {
+            margin-top: 0;
+        }
+        button {
+            width: 100%;
+            padding: 5px;
+            margin-top: 10px;
+        }
+        #currencyOptions {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        label {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+            margin-bottom: 5px;
+            width: calc(33.33% - 10px);
+        }
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .converter {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .converter-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .converter select, .converter input {
+            margin: 5px 0;
+            flex-grow: 1;
+        }
+        #exchangeRates {
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        #cc-convert {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .author-info {
+            margin-top: 20px;
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+        }
+        .linkedin-link {
+            display: inline-block;
+            margin-top: 5px;
+        }
+        .linkedin-logo {
+            width: 20px;
+            height: 20px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h3>Currency Converter</h3>
+    <button id="refreshRates">Refresh Exchange Rates</button>
+    <p id="lastUpdate"></p>
+    
+    <div class="converter">
+        <div class="converter-row">
+            <select id="cc-from-currency"></select>
+            <input type="number" id="cc-from-amount" placeholder="Amount">
+        </div>
+        <div class="converter-row">
+            <select id="cc-to-currency"></select>
+            <input type="number" id="cc-to-amount" readonly>
+        </div>
+        <button id="cc-convert">Convert</button>
+    </div>
+    <br>
+    <h3>Choose Currencies to Display</h3>
+    <div id="currencyOptions"></div>
+    <button id="save">Save Options</button>
+    
+    <div class="author-info">
+        <p>Created by <a href="https://www.linkedin.com/in/enoswong" target="_blank" class="linkedin-link">ENOS Wong</a></p>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "貨幣轉換插件",
+    "version": "1.0",
+    "description": "自動轉換頁面上的貨幣為港幣",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "alarms",
+        "tabs"
+    ],
+    "host_permissions": [
+        "https://api.hkma.gov.hk/"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
