@@ -14,8 +14,7 @@ const ccCurrencySymbols = {
     'CNY': '¥',
     'KRW': '₩',
     'THB': '฿',
-    'MYR': 'RM',
-    'TWD': 'NT$'
+    'MYR': 'RM'
 };
 
 // 货币名称和符号映射
@@ -31,8 +30,7 @@ const ccCurrencyInfo = {
     'CNY': { name: 'Chinese Yuan', symbol: '¥', aliases: ['人民幣', 'RMB', 'Yuan', 'CNY', '元'] },
     'KRW': { name: 'South Korean Won', symbol: '₩', aliases: ['KRW', 'Won', '원'] },
     'THB': { name: 'Thai Baht', symbol: '฿', aliases: ['THB', 'Baht', 'บาท'] },
-    'MYR': { name: 'Malaysian Ringgit', symbol: 'RM', aliases: ['MYR', 'Ringgit'] },
-    'TWD': { name: 'New Taiwan Dollar', symbol: 'NT$', aliases: ['新台幣', 'NT', 'TWD', 'Taiwan Dollar', '台幣'] }
+    'MYR': { name: 'Malaysian Ringgit', symbol: 'RM', aliases: ['MYR', 'Ringgit'] }
 };
 
 // 识别货币和金额的函数
@@ -106,12 +104,8 @@ function ccConvertAndDisplayCurrency(element) {
             const rate = ccExchangeRates[currency];
             let convertedAmount;
             
-            // 根據匯率是否小於1來調整計算方法
-            if (rate < 1) {
-                convertedAmount = (amount / (1 / rate)).toFixed(2);
-            } else {
-                convertedAmount = (amount / rate).toFixed(2);
-            }
+            // 統一使用除法進行轉換
+            convertedAmount = (amount * rate).toFixed(2);
 
             // 創建一個新的 span 元素來包含轉換後的金額
             const ccConvertedElement = document.createElement('span');
@@ -251,6 +245,7 @@ function updateExchangeRateDisplay() {
         
         let content = '<div  style="display: flex; justify-content: space-between; align-items: center;">';
         content += '<strong>匯率: 1外幣 = x港幣</strong>';
+        content += '<strong>(如使用未列出貨幣，可能導致錯誤計算)</strong>';
         content += '<button id="cc-close-rates" style="font-size: 12px; padding: 2px 5px;">關閉</button>';
         content += '</div><br>';
         
@@ -336,3 +331,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         updateExchangeRateDisplay();
     }
 });
+
+// 統一的匯率計算函數
+function calculateExchangeRate(amount, fromCurrency, toCurrency) {
+    if (fromCurrency === toCurrency) {
+        return amount;
+    }
+
+    const fromRate = ccExchangeRates[fromCurrency];
+    const toRate = ccExchangeRates[toCurrency];
+
+    if (!fromRate || !toRate) {
+        console.error(`Exchange rate not available for ${fromCurrency} or ${toCurrency}`);
+        return null;
+    }
+
+    // 先轉換為港幣，再轉換為目標貨幣
+    const hkdAmount = amount / fromRate;
+    const convertedAmount = hkdAmount * toRate;
+
+    return convertedAmount;
+}

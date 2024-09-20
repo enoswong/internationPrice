@@ -43,11 +43,12 @@ async function fetchExchangeRates() {
         if (data.result && data.result.records && data.result.records.length > 0) {
             const latestRecord = data.result.records[0];
             const rates = {};
-            const currencies = ['usd', 'gbp', 'jpy', 'eur', 'cad', 'aud', 'sgd', 'chf', 'cny', 'krw', 'thb', 'myr', 'twd'];
+            const currencies = ['usd', 'gbp', 'jpy', 'eur', 'cad', 'aud', 'sgd', 'chf', 'cny', 'krw', 'thb', 'myr'];
             
             for (const currency of currencies) {
                 if (latestRecord[currency]) {
-                    rates[currency.toUpperCase()] = 1 / latestRecord[currency];
+                    // 直接使用 API 返回的匯率，不需要取倒數
+                    rates[currency.toUpperCase()] = latestRecord[currency];
                 }
             }
             

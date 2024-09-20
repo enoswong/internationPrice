@@ -1,4 +1,4 @@
-const currencyList = ['HKD', 'USD', 'GBP', 'EUR', 'JPY', 'TWD', 'CNY', 'AUD', 'CAD', 'CHF', 'SGD', 'MYR', 'THB', 'KRW'];
+const currencyList = ['HKD', 'USD', 'GBP', 'EUR', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'SGD', 'MYR', 'THB', 'KRW'];
 
 document.addEventListener('DOMContentLoaded', () => {
     restoreOptions();
@@ -109,26 +109,6 @@ function setupCurrencyConverter() {
     });
 }
 
-function displayExchangeRates(rates) {
-    const ratesContainer = document.getElementById('ccExchangeRates');
-    if (!ratesContainer) {
-        console.error('Element with id "ccExchangeRates" not found');
-        return;
-    }
-    let content = '<strong>匯率:</strong><br>';
-    for (const [currency, rate] of Object.entries(rates)) {
-        if (currency !== 'HKD') {
-            if (rate < 1) {
-                const inverseRate = (1 / rate).toFixed(2);
-                content += `${currency}: ${rate.toFixed(4)} HKD (${inverseRate} ${currency} = 1 HKD)<br>`;
-            } else {
-                content += `${currency}: ${rate.toFixed(4)} HKD<br>`;
-            }
-        }
-    }
-    ratesContainer.innerHTML = content;
-}
-
 function convertCurrency() {
     chrome.storage.local.get('ccExchangeRates', (result) => {
         const rates = result.ccExchangeRates || {};
@@ -141,20 +121,29 @@ function convertCurrency() {
             return;
         }
 
-        const fromRate = rates[fromCurrency];
-        const toRate = rates[toCurrency];
-
-        if (fromRate && toRate) {
-            let toAmount;
-            if (toCurrency === 'HKD') {
-                toAmount = fromRate < 1 ? (fromAmount / (1 / fromRate)) : (fromAmount * fromRate);
-            } else if (fromCurrency === 'HKD') {
-                toAmount = toRate < 1 ? (fromAmount * (1 / toRate)) : (fromAmount / toRate);
-            } else {
-                const hkdAmount = fromRate < 1 ? (fromAmount / (1 / fromRate)) : (fromAmount * fromRate);
-                toAmount = toRate < 1 ? (hkdAmount * (1 / toRate)) : (hkdAmount / toRate);
+        function calculateExchangeRate(amount, fromCurrency, toCurrency) {
+            if (fromCurrency === toCurrency) {
+                return amount;
             }
-            document.getElementById('cc-to-amount').value = toAmount.toFixed(2);
+
+            const fromRate = rates[fromCurrency];
+            const toRate = rates[toCurrency];
+
+            if (!fromRate || !toRate) {
+                console.error(`Exchange rate not available for ${fromCurrency} or ${toCurrency}`);
+                return null;
+            }
+
+            // 先轉換為港幣，再轉換為目標貨幣
+            const hkdAmount = amount / fromRate;
+            const convertedAmount = hkdAmount * toRate;
+
+            return convertedAmount;
+        }
+
+        const convertedAmount = calculateExchangeRate(fromAmount, fromCurrency, toCurrency);
+        if (convertedAmount !== null) {
+            document.getElementById('cc-to-amount').value = convertedAmount.toFixed(2);
         } else {
             alert('無法轉換所選貨幣');
         }
