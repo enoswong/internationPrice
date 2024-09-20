@@ -5,37 +5,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         chrome.storage.local.get(['exchangeRates', 'lastUpdated'], (result) => {
             sendResponse({ rates: result.exchangeRates, lastUpdated: result.lastUpdated });
         });
-        return true; // 表示會異步發送回應
+        return true;
     } else if (request.action === "refreshRates") {
-        checkAndUpdateRates()
+        fetchExchangeRates()
             .then(() => sendResponse({success: true}))
             .catch(() => sendResponse({success: false}));
-        return true;  // 表示我们将异步发送响应
+        return true;
     }
 });
-
-async function checkAndUpdateRates() {
-    try {
-        const rates = await fetchExchangeRates();
-        const now = new Date();
-        await chrome.storage.local.set({
-            ccExchangeRates: rates,
-            lastUpdateTime: now.getTime()
-        });
-        console.log("Updated exchange rates:", rates);
-        return true;
-    } catch (error) {
-        console.error("Error updating exchange rates:", error);
-        throw error;
-    }
-}
-
-// 判断是否是新的一天
-function isNewDay(lastUpdate, now) {
-    return lastUpdate.getDate() !== now.getDate() ||
-        lastUpdate.getMonth() !== now.getMonth() ||
-        lastUpdate.getFullYear() !== now.getFullYear();
-}
 
 async function fetchExchangeRates() {
     try {
@@ -48,13 +25,14 @@ async function fetchExchangeRates() {
             
             for (const currency of currencyList) {
                 if (latestRecord[currency.toLowerCase()]) {
-                    // 直接使用 API 返回的匯率，不需要取倒數
                     rates[currency] = latestRecord[currency.toLowerCase()];
                 }
             }
             
-            // 儲存匯率到 Chrome 存儲
-            chrome.storage.local.set({ exchangeRates: rates, lastUpdated: new Date().toISOString() });
+            await chrome.storage.local.set({ 
+                exchangeRates: rates, 
+                lastUpdated: new Date().toISOString() 
+            });
             console.log('Exchange rates updated:', rates);
             return rates;
         } else {
@@ -72,16 +50,14 @@ setInterval(fetchExchangeRates, 60 * 60 * 1000);
 // 初始化時獲取匯率
 fetchExchangeRates();
 
-// 每天凌晨00:00检查并更新汇率
+// 每天凌晨00:00更新汇率
 chrome.alarms.create('updateRates', { periodInMinutes: 1440 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'updateRates') {
-        checkAndUpdateRates();
+        fetchExchangeRates();
     }
 });
 
-// 插件安装或更新时立即检查并更新汇率
-chrome.runtime.onInstalled.addListener(() => {
-    checkAndUpdateRates();
-});
+// 插件安装或更新时立即更新汇率
+chrome.runtime.onInstalled.addListener(fetchExchangeRates);
