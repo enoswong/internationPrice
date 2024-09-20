@@ -69,6 +69,15 @@
             height: 20px;
             vertical-align: middle;
         }
+        #savedRatesContainer {
+            margin-top: 15px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -98,6 +107,8 @@
     <div class="author-info">
         <p>Created by <a href="https://www.linkedin.com/in/enoswong" target="_blank" class="linkedin-link">ENOS Wong</a></p>
     </div>
+    <button id="toggleSavedRates">Toggle Saved Exchange Rates</button>
+    <div id="savedRatesContainer" style="display: none;"></div>
     <script src="popup.js"></script>
 </body>
 </html>

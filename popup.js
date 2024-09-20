@@ -1,4 +1,4 @@
-const currencyList = ['HKD', 'USD', 'GBP', 'EUR', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'SGD', 'MYR', 'THB', 'KRW'];
+const currencyList = ['HKD', 'USD', 'GBP', 'EUR', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'SGD', 'MYR', 'THB','TWD', 'KRW'];
 
 document.addEventListener('DOMContentLoaded', () => {
     restoreOptions();
@@ -12,15 +12,32 @@ document.addEventListener('DOMContentLoaded', () => {
             displayExchangeRates(result.ccExchangeRates);
         }
     });
+
+    if(document.getElementById('toggleSavedRates')){
+    document.getElementById('toggleSavedRates').addEventListener('click', toggleSavedRates);
+    }
 });
 
 function refreshRates() {
     chrome.runtime.sendMessage({ action: "refreshRates" }, (response) => {
         if (response.success) {
             document.getElementById('lastUpdate').textContent = 'Rates updated successfully!';
+
             // 重新获取并显示更新后的汇率
-            chrome.storage.local.get('ccExchangeRates', (result) => {
+            chrome.storage.local.get(['ccExchangeRates', 'selectedCurrencies'], (result) => {
                 if (result.ccExchangeRates) {
+                    // 輸出全部資料
+                    console.log('all rate data:', result.ccExchangeRates);
+                    
+                    // 輸出儲存的資料
+                    const savedRates = {};
+                    (result.selectedCurrencies || []).forEach(currency => {
+                        if (result.ccExchangeRates[currency]) {
+                            savedRates[currency] = result.ccExchangeRates[currency];
+                        }
+                    });
+                    console.log('saved rate data:', savedRates);
+
                     // 確保 DOM 已加載完成
                     if (document.readyState === 'complete') {
                         displayExchangeRates(result.ccExchangeRates);
@@ -40,7 +57,7 @@ function refreshRates() {
 function saveOptions() {
     const selectedCurrencies = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
     chrome.storage.sync.set({ selectedCurrencies: selectedCurrencies }, () => {
-        console.log('Options saved');
+        console.log("Options saved");
         const status = document.createElement('div');
         status.textContent = 'Options saved.';
         status.style.color = 'green';
@@ -168,4 +185,37 @@ function displayExchangeRates(rates) {
         }
     }
     ratesContainer.innerHTML = content;
+}
+
+function toggleSavedRates() {
+    const savedRatesContainer = document.getElementById('savedRatesContainer');
+    const toggleButton = document.getElementById('toggleSavedRates');
+
+    if (savedRatesContainer.style.display === 'none') {
+        // 如果容器是隱藏的，顯示它並加載數據
+        chrome.storage.local.get(['exchangeRates', 'lastUpdated'], (result) => {
+            if (result.exchangeRates && result.lastUpdated) {
+                let content = `<h4>Last Updated: ${new Date(result.lastUpdated).toLocaleString()}</h4>`;
+                content += '<table><tr><th>Currency</th><th>Rate (1 HKD =)</th></tr>';
+                for (const [currency, rate] of Object.entries(result.exchangeRates)) {
+                    if (currency !== 'HKD') {
+                        const inverseRate = (1 / rate).toFixed(4);
+                        content += `<tr><td>${currency}</td><td>${inverseRate}</td></tr>`;
+                    }
+                }
+                content += '</table>';
+                savedRatesContainer.innerHTML = content;
+                savedRatesContainer.style.display = 'block';
+                toggleButton.textContent = 'Hide Saved Exchange Rates';
+            } else {
+                savedRatesContainer.innerHTML = '<p>No saved exchange rates found.</p>';
+                savedRatesContainer.style.display = 'block';
+                toggleButton.textContent = 'Hide Saved Exchange Rates';
+            }
+        });
+    } else {
+        // 如果容器是可見的，隱藏它
+        savedRatesContainer.style.display = 'none';
+        toggleButton.textContent = 'Show Saved Exchange Rates';
+    }
 }

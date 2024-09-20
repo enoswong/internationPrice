@@ -14,11 +14,14 @@ const ccCurrencySymbols = {
     'CNY': '¥',
     'KRW': '₩',
     'THB': '฿',
-    'MYR': 'RM'
+    'TWD': 'NT$',
+    'MYR': 'RM',
+    'HKD': 'HK$'
 };
 
 // 货币名称和符号映射
 const ccCurrencyInfo = {
+    'TWD': { name: 'New Taiwan Dollar', symbol: 'NT$', aliases: ['TWD', 'NT$', '新台幣', 'NT', '台幣'] },
     'USD': { name: 'US Dollar', symbol: '$', aliases: ['Dollar', 'US', 'USD', 'US$'] },
     'GBP': { name: 'British Pound', symbol: '£', aliases: ['Pound', 'Sterling', 'GBP'] },
     'JPY': { name: 'Japanese Yen', symbol: '¥', aliases: ['Yen', 'JPY', '円'] },
@@ -30,7 +33,8 @@ const ccCurrencyInfo = {
     'CNY': { name: 'Chinese Yuan', symbol: '¥', aliases: ['人民幣', 'RMB', 'Yuan', 'CNY', '元'] },
     'KRW': { name: 'South Korean Won', symbol: '₩', aliases: ['KRW', 'Won', '원'] },
     'THB': { name: 'Thai Baht', symbol: '฿', aliases: ['THB', 'Baht', 'บาท'] },
-    'MYR': { name: 'Malaysian Ringgit', symbol: 'RM', aliases: ['MYR', 'Ringgit'] }
+    'MYR': { name: 'Malaysian Ringgit', symbol: 'RM', aliases: ['MYR', 'Ringgit'] },
+    'HKD': { name: 'Hong Kong Dollar', symbol: 'HK$', aliases: ['HKD', 'HK$', '港幣', 'HK'] }
 };
 
 // 识别货币和金额的函数
@@ -38,34 +42,46 @@ function ccIdentifyCurrency(text) {
     // 更新正则表达式以匹配包含千位分隔符的数字
     const ccPriceRegex = /([\d,]+([.,]\d{1,2})?)/;
     const ccPriceMatch = text.match(ccPriceRegex);
-
+    
     if (ccPriceMatch) {
         // 移除所有逗号，然后解析为浮点数
         const ccAmount = parseFloat(ccPriceMatch[1].replace(/,/g, ''));
 
         for (const [currency, info] of Object.entries(ccCurrencyInfo)) {
-            // 首先检查完整的货币名称或代码
-            if (text.includes(currency) || text.toLowerCase().includes(info.name.toLowerCase())) {
-                return { currency, amount: ccAmount };
-            }
-            
-            // 然后检查符号和别名，但要确保不会误识别
-            if (info.symbol !== '$' && text.includes(info.symbol)) {
-                return { currency, amount: ccAmount };
-            }
-            
+            // 检查别名
             for (const alias of info.aliases) {
-                if (alias !== '$' && text.includes(alias)) {
+                if (text.includes(alias)) {
+                    console.log(`Text: ${text} Amount: ${ccAmount} Found alias: ${alias}`);
                     return { currency, amount: ccAmount };
                 }
             }
+                        
+            // 检查货币名称（不区分大小写）
+            if (text.toLowerCase().includes(info.name.toLowerCase())) {
+                console.log(`Text: ${text} Amount: ${ccAmount} Found name: ${info.name}`);
+                return { currency, amount: ccAmount };
+            }
+
+            // 检查货币代码
+            if (text.includes(currency)) {
+                console.log(`Text: ${text} Amount: ${ccAmount} Found currency: ${currency}`);
+                return { currency, amount: ccAmount };
+            }
+
+            // 检查货币符号
+            if (text.includes(info.symbol)) {
+                console.log(`Text: ${text} Amount: ${ccAmount} Found symbol: ${info.symbol}`);
+                return { currency, amount: ccAmount };
+            }    
         }
 
         // 如果只找到 '$' 符号，默认为 USD
         if (text.includes('$')) {
+            console.log(`Text: ${text} Amount: ${ccAmount} Found default currency: USD`);
             return { currency: 'USD', amount: ccAmount };
         }
     }
+
 
     return null;
 }
