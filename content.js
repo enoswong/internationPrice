@@ -349,5 +349,5 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 // 匯率計算函數
 function calculateConvertedAmount(amount, rate) {
-    return (amount / rate).toFixed(2);
+    return (amount * rate).toFixed(2);
 }
