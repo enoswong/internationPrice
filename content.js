@@ -214,6 +214,8 @@ function createExchangeRateDisplay() {
     document.body.appendChild(display);
     console.log("Exchange rate display created and added to the page");
 
+    display.setAttribute('data-cc-converted', 'true');
+
     // 添加鼠标悬停效果
     display.addEventListener('mouseenter', () => {
         display.style.opacity = '1';
@@ -240,6 +242,7 @@ function updateExchangeRateDisplay() {
         return;
     }
 
+
     chrome.storage.sync.get('selectedCurrencies', (result) => {
         const selectedCurrencies = result.selectedCurrencies || Object.keys(ccCurrencySymbols);
         
@@ -254,8 +257,9 @@ function updateExchangeRateDisplay() {
                 content += `${currency}: ${inverseRate} HKD<br>`;
 
                 if(rate > 1){
-                    content += `<span style="color: red;">(${currency}: ${rate.toFixed(4)} HKD)</span><br>`;
-                }                
+                    content += `<div style="color: red;" data-cc-converted="true">(${currency}: ${rate.toFixed(4)} HKD)</div>`;
+                }      
+                content += '<br>';          
             }
         }
 
