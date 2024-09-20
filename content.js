@@ -104,20 +104,20 @@ function ccConvertAndDisplayCurrency(element) {
             const rate = ccExchangeRates[currency];
             let convertedAmount;
             
-            // 統一使用除法進行轉換
-            convertedAmount = (amount * rate).toFixed(2);
+            // 统一使用除法进行转换
+            convertedAmount = calculateConvertedAmount(amount, rate);
 
-            // 創建一個新的 span 元素來包含轉換後的金額
+            // 创建一个新的 span 元素来包含转换后的金额
             const ccConvertedElement = document.createElement('span');
             ccConvertedElement.textContent = ` (HKD ${convertedAmount})`;
             ccConvertedElement.style.color = 'green';
             ccConvertedElement.classList.add('cc-currency-conversion');
             ccConvertedElement.classList.add(currency.toLowerCase());
 
-            // 將轉換後的金額直接添加到原文本的後面
+            // 将转换后的金额直接添加到原文本的后面
             element.appendChild(ccConvertedElement);
 
-            // 標記元素已被轉換
+            // 标记元素已被转换
             element.setAttribute('data-cc-converted', 'true');
 
             console.log(`Converted ${amount} ${currency} to HKD ${convertedAmount} (Rate: ${rate})`);
@@ -214,7 +214,7 @@ function createExchangeRateDisplay() {
     document.body.appendChild(display);
     console.log("Exchange rate display created and added to the page");
 
-    // 添加鼠標懸停效果
+    // 添加鼠标悬停效果
     display.addEventListener('mouseenter', () => {
         display.style.opacity = '1';
     });
@@ -243,7 +243,7 @@ function updateExchangeRateDisplay() {
     chrome.storage.sync.get('selectedCurrencies', (result) => {
         const selectedCurrencies = result.selectedCurrencies || Object.keys(ccCurrencySymbols);
         
-        let content = '<div  style="display: flex; justify-content: space-between; align-items: center;">';
+        let content = '<div id="cc-rate-header" style="display: flex; justify-content: space-between; align-items: center;">';
         content += '<strong>匯率: 1外幣 = x港幣</strong>';
         content += '<button id="cc-close-rates" style="font-size: 12px; padding: 2px 5px;">關閉</button>';
         content += '</div><br>';
@@ -262,43 +262,59 @@ function updateExchangeRateDisplay() {
         display.innerHTML = content;
         console.log("Exchange rate display updated");
 
-        // 添加關閉按鈕事件監聽器
-        document.getElementById('cc-close-rates').addEventListener('click', () => {
-            display.style.display = 'none';
-            createShowButton();
-        });
+        // 在更新内容后重新添加关闭按钮事件监听器
+        addCloseButtonListener();
     });
 }
 
-// 创建显示按钮
+// 新增一个函数来添加关闭按钮的事件监听器
+function addCloseButtonListener() {
+    const closeButton = document.getElementById('cc-close-rates');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            const display = document.getElementById('cc-exchange-rate-display');
+            if (display) {
+                display.style.display = 'none';
+                createShowButton();
+            }
+        });
+    }
+}
+
+// 修改 createShowButton 函数
 function createShowButton() {
-    const showButton = document.createElement('button');
-    showButton.id = 'cc-show-rates';
-    showButton.textContent = '顯示匯率';
-    showButton.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        background-color: rgba(255, 255, 255, 0.9);
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        padding: 5px 10px;
-        font-size: 12px;
-        z-index: 9999;
-        cursor: pointer;
-    `;
-    
-    showButton.addEventListener('click', () => {
-        showButton.remove();
-        const display = document.getElementById('cc-exchange-rate-display');
-        if (display) {
-            display.style.display = 'block';
-        } else {
-            updateExchangeRateDisplay();
-        }
-    });
-    
-    document.body.appendChild(showButton);
+    let showButton = document.getElementById('cc-show-rates');
+    if (showButton) {
+        showButton.style.display = 'block';
+    } else {
+        showButton = document.createElement('button');
+        showButton.id = 'cc-show-rates';
+        showButton.textContent = '顯示匯率';
+        showButton.style.cssText = `
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            z-index: 9999;
+            cursor: pointer;
+        `;
+        
+        showButton.addEventListener('click', () => {
+            showButton.style.display = 'none';
+            const display = document.getElementById('cc-exchange-rate-display');
+            if (display) {
+                display.style.display = 'block';
+            } else {
+                updateExchangeRateDisplay();
+            }
+        });
+        
+        document.body.appendChild(showButton);
+    }
 }
 
 // 创建一个 MutationObserver 实例
@@ -330,3 +346,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         updateExchangeRateDisplay();
     }
 });
+
+// 匯率計算函數
+function calculateConvertedAmount(amount, rate) {
+    return (amount / rate).toFixed(2);
+}
