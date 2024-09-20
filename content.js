@@ -193,7 +193,7 @@ async function ccInitialize() {
 function createExchangeRateDisplay() {
     console.log("Creating exchange rate display");
     const display = document.createElement('div');
-    display.id = 'cc-exchange-rate-display data-cc-converted';
+    display.id = 'cc-exchange-rate-display';
     display.style.cssText = `
         position: fixed;
         bottom: 10px;
@@ -245,7 +245,6 @@ function updateExchangeRateDisplay() {
         
         let content = '<div  style="display: flex; justify-content: space-between; align-items: center;">';
         content += '<strong>匯率: 1外幣 = x港幣</strong>';
-        content += '<strong>(如使用未列出貨幣，可能導致錯誤計算)</strong>';
         content += '<button id="cc-close-rates" style="font-size: 12px; padding: 2px 5px;">關閉</button>';
         content += '</div><br>';
         
@@ -331,24 +330,3 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         updateExchangeRateDisplay();
     }
 });
-
-// 統一的匯率計算函數
-function calculateExchangeRate(amount, fromCurrency, toCurrency) {
-    if (fromCurrency === toCurrency) {
-        return amount;
-    }
-
-    const fromRate = ccExchangeRates[fromCurrency];
-    const toRate = ccExchangeRates[toCurrency];
-
-    if (!fromRate || !toRate) {
-        console.error(`Exchange rate not available for ${fromCurrency} or ${toCurrency}`);
-        return null;
-    }
-
-    // 先轉換為港幣，再轉換為目標貨幣
-    const hkdAmount = amount / fromRate;
-    const convertedAmount = hkdAmount * toRate;
-
-    return convertedAmount;
-}

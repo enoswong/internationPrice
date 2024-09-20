@@ -149,3 +149,23 @@ function convertCurrency() {
         }
     });
 }
+
+function displayExchangeRates(rates) {
+    const ratesContainer = document.getElementById('ccExchangeRates');
+    if (!ratesContainer) {
+        console.error('Element with id "ccExchangeRates" not found');
+        return;
+    }
+    let content = '<strong>匯率:</strong><br>';
+    for (const [currency, rate] of Object.entries(rates)) {
+        if (currency !== 'HKD') {
+            if (rate < 1) {
+                const inverseRate = (1 / rate).toFixed(2);
+                content += `${currency}: ${rate.toFixed(4)} HKD (${inverseRate} ${currency} = 1 HKD)<br>`;
+            } else {
+                content += `${currency}: ${rate.toFixed(4)} HKD<br>`;
+            }
+        }
+    }
+    ratesContainer.innerHTML = content;
+}
