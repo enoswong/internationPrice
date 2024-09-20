@@ -1,5 +1,3 @@
-const currencyList = ['HKD', 'USD', 'GBP', 'EUR', 'JPY', 'CNY', 'AUD', 'CAD', 'CHF', 'SGD', 'MYR', 'THB','TWD', 'KRW'];
-
 document.addEventListener('DOMContentLoaded', () => {
     restoreOptions();
     document.getElementById('refreshRates').addEventListener('click', refreshRates);
@@ -13,8 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    if(document.getElementById('toggleSavedRates')){
-    document.getElementById('toggleSavedRates').addEventListener('click', toggleSavedRates);
+    if (document.getElementById('toggleSavedRates')) {
+        document.getElementById('toggleSavedRates').addEventListener('click', toggleSavedRates);
     }
 });
 
@@ -28,7 +26,7 @@ function refreshRates() {
                 if (result.ccExchangeRates) {
                     // 輸出全部資料
                     console.log('all rate data:', result.ccExchangeRates);
-                    
+
                     // 輸出儲存的資料
                     const savedRates = {};
                     (result.selectedCurrencies || []).forEach(currency => {
@@ -67,15 +65,15 @@ function saveOptions() {
         }, 2000);
 
         // 通知 content script 更新匯率顯示
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, {action: "updateExchangeRateDisplay"});
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: "updateExchangeRateDisplay" });
         });
     });
 }
 
 function restoreOptions() {
     chrome.storage.sync.get('selectedCurrencies', (result) => {
-        const selectedCurrencies = result.selectedCurrencies || Object.keys(currencyList);
+        const selectedCurrencies = result.selectedCurrencies || Object.keys(ccCurrencyInfo);
         const optionsContainer = document.getElementById('currencyOptions');
 
         currencyList.forEach(currency => {

@@ -1,48 +1,11 @@
-// 儲存匯率的對象
-let ccExchangeRates = {};
 
-// 货币符号映射
-const ccCurrencySymbols = {
-    'USD': '$',
-    'GBP': '£',
-    'JPY': '¥',
-    'EUR': '€',
-    'CAD': 'C$',
-    'AUD': 'A$',
-    'SGD': 'S$',
-    'CHF': 'Fr.',
-    'CNY': '¥',
-    'KRW': '₩',
-    'THB': '฿',
-    'TWD': 'NT$',
-    'MYR': 'RM',
-    'HKD': 'HK$'
-};
-
-// 货币名称和符号映射
-const ccCurrencyInfo = {
-    'TWD': { name: 'New Taiwan Dollar', symbol: 'NT$', aliases: ['TWD', 'NT$', '新台幣', 'NT', '台幣'] },
-    'USD': { name: 'US Dollar', symbol: '$', aliases: ['Dollar', 'US', 'USD', 'US$'] },
-    'GBP': { name: 'British Pound', symbol: '£', aliases: ['Pound', 'Sterling', 'GBP'] },
-    'JPY': { name: 'Japanese Yen', symbol: '¥', aliases: ['Yen', 'JPY', '円'] },
-    'EUR': { name: 'Euro', symbol: '€', aliases: ['EUR'] },
-    'CAD': { name: 'Canadian Dollar', symbol: 'C$', aliases: ['CAD', 'CA Dollar'] },
-    'AUD': { name: 'Australian Dollar', symbol: 'A$', aliases: ['AUD', 'AU Dollar'] },
-    'SGD': { name: 'Singapore Dollar', symbol: 'S$', aliases: ['SGD', 'SG Dollar'] },
-    'CHF': { name: 'Swiss Franc', symbol: 'Fr.', aliases: ['CHF', 'Franc'] },
-    'CNY': { name: 'Chinese Yuan', symbol: '¥', aliases: ['人民幣', 'RMB', 'Yuan', 'CNY', '元'] },
-    'KRW': { name: 'South Korean Won', symbol: '₩', aliases: ['KRW', 'Won', '원'] },
-    'THB': { name: 'Thai Baht', symbol: '฿', aliases: ['THB', 'Baht', 'บาท'] },
-    'MYR': { name: 'Malaysian Ringgit', symbol: 'RM', aliases: ['MYR', 'Ringgit'] },
-    'HKD': { name: 'Hong Kong Dollar', symbol: 'HK$', aliases: ['HKD', 'HK$', '港幣', 'HK'] }
-};
 
 // 识别货币和金额的函数
 function ccIdentifyCurrency(text) {
     // 更新正则表达式以匹配包含千位分隔符的数字
     const ccPriceRegex = /([\d,]+([.,]\d{1,2})?)/;
     const ccPriceMatch = text.match(ccPriceRegex);
-    
+
     if (ccPriceMatch) {
         // 移除所有逗号，然后解析为浮点数
         const ccAmount = parseFloat(ccPriceMatch[1].replace(/,/g, ''));
@@ -55,7 +18,7 @@ function ccIdentifyCurrency(text) {
                     return { currency, amount: ccAmount };
                 }
             }
-                        
+
             // 检查货币名称（不区分大小写）
             if (text.toLowerCase().includes(info.name.toLowerCase())) {
                 console.log(`Text: ${text} Amount: ${ccAmount} Found name: ${info.name}`);
@@ -72,7 +35,7 @@ function ccIdentifyCurrency(text) {
             if (text.includes(info.symbol)) {
                 console.log(`Text: ${text} Amount: ${ccAmount} Found symbol: ${info.symbol}`);
                 return { currency, amount: ccAmount };
-            }    
+            }
         }
 
         // 如果只找到 '$' 符号，默认为 USD
@@ -119,7 +82,7 @@ function ccConvertAndDisplayCurrency(element) {
         if (currency in ccExchangeRates && currency !== 'HKD') {
             const rate = ccExchangeRates[currency];
             let convertedAmount;
-            
+
             // 统一使用除法进行转换
             convertedAmount = calculateConvertedAmount(amount, rate);
 
@@ -191,7 +154,7 @@ async function ccInitialize() {
             updateExchangeRateDisplay();
             ccProcessAllElements();
             observer.observe(document.body, { childList: true, subtree: true });
-            
+
             // 添加延迟的二次扫描
             setTimeout(() => {
                 ccProcessAllElements();
@@ -226,7 +189,7 @@ function createExchangeRateDisplay() {
         overflow-y: auto;
         transition: opacity 0.3s ease-in-out;
     `;
-    
+
     document.body.appendChild(display);
     console.log("Exchange rate display created and added to the page");
 
@@ -260,22 +223,22 @@ function updateExchangeRateDisplay() {
 
 
     chrome.storage.sync.get('selectedCurrencies', (result) => {
-        const selectedCurrencies = result.selectedCurrencies || Object.keys(ccCurrencySymbols);
-        
+        const selectedCurrencies = result.selectedCurrencies;
+
         let content = '<div id="cc-rate-header" style="display: flex; justify-content: space-between; align-items: center;">';
         content += '<strong>匯率: 1外幣 = x港幣</strong>';
         content += '<button id="cc-close-rates" style="font-size: 12px; padding: 2px 5px;">關閉</button>';
         content += '</div><br>';
-        
+
         for (const [currency, rate] of Object.entries(ccExchangeRates)) {
             if (currency !== 'HKD' && rate !== undefined && selectedCurrencies.includes(currency)) {
                 const inverseRate = (1 / rate).toFixed(4);
                 content += `${currency}: ${inverseRate} HKD<br>`;
 
-                if(rate > 1){
+                if (rate > 1) {
                     content += `<div style="color: red;" data-cc-converted="true">(${currency}: ${rate.toFixed(4)} HKD)</div>`;
-                }      
-                content += '<br>';          
+                }
+                content += '<br>';
             }
         }
 
@@ -322,7 +285,7 @@ function createShowButton() {
             z-index: 9999;
             cursor: pointer;
         `;
-        
+
         showButton.addEventListener('click', () => {
             showButton.style.display = 'none';
             const display = document.getElementById('cc-exchange-rate-display');
@@ -332,7 +295,7 @@ function createShowButton() {
                 updateExchangeRateDisplay();
             }
         });
-        
+
         document.body.appendChild(showButton);
     }
 }

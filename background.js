@@ -1,3 +1,5 @@
+importScripts('sharedInfo.js');
+
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getExchangeRates") {
         chrome.storage.local.get(['exchangeRates', 'lastUpdated'], (result) => {
@@ -43,12 +45,11 @@ async function fetchExchangeRates() {
         if (data.result && data.result.records && data.result.records.length > 0) {
             const latestRecord = data.result.records[0];
             const rates = {};
-            const currencies = ['usd', 'gbp', 'jpy', 'eur', 'cad', 'aud', 'sgd', 'chf', 'cny', 'krw', 'thb', 'myr'];
             
-            for (const currency of currencies) {
-                if (latestRecord[currency]) {
+            for (const currency of currencyList) {
+                if (latestRecord[currency.toLowerCase()]) {
                     // 直接使用 API 返回的匯率，不需要取倒數
-                    rates[currency.toUpperCase()] = latestRecord[currency];
+                    rates[currency] = latestRecord[currency.toLowerCase()];
                 }
             }
             
