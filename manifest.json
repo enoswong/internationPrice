@@ -21,11 +21,22 @@
                 "<all_urls>"
             ],
             "js": [
+                "sharedInfo.js",
                 "content.js"
             ]
         }
     ],
     "action": {
         "default_popup": "popup.html"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "sharedInfo.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
 }

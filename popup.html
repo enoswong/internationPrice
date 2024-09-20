@@ -69,7 +69,17 @@
             height: 20px;
             vertical-align: middle;
         }
+        #savedRatesContainer {
+            margin-top: 15px;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: none;
+        }
     </style>
+    <script src="sharedInfo.js"></script>
 </head>
 <body>
     <h3>Currency Converter</h3>
@@ -91,10 +101,15 @@
     <h3>Choose Currencies to Display</h3>
     <div id="currencyOptions"></div>
     <button id="save">Save Options</button>
+    <br>
+    <br>
+    <h3 style="color: red;">Use of unlisted currencies may result in unspecified errors.</h3>
     
     <div class="author-info">
         <p>Created by <a href="https://www.linkedin.com/in/enoswong" target="_blank" class="linkedin-link">ENOS Wong</a></p>
     </div>
+    <button id="toggleSavedRates">Toggle Saved Exchange Rates</button>
+    <div id="savedRatesContainer" style="display: none;"></div>
     <script src="popup.js"></script>
 </body>
 </html>
