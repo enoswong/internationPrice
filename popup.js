@@ -71,11 +71,18 @@ function restoreOptions() {
     });
 }
 
+let rates = {}
+
 function setupCurrencyConverter() {
     chrome.storage.local.get(['mainPageCurrency', 'exchangeRates'], (result) => {
         const mainCurrency = result.mainPageCurrency || 'USD';
-        const rates = result.exchangeRates || {};
+        rates = result.exchangeRates || {};
 
+        // Add HKD with rate 1 if it doesn't exist
+        if (!rates.hasOwnProperty('HKD')) {
+            rates['HKD'] = 1;
+        }
+        
         const fromSelect = document.getElementById('cc-from-currency');
         const toSelect = document.getElementById('cc-to-currency');
 
@@ -92,13 +99,12 @@ function setupCurrencyConverter() {
 
 function convertCurrency() {
     chrome.storage.local.get('exchangeRates', (result) => {
-        const rates = result.exchangeRates || {};
         const fromCurrency = document.getElementById('cc-from-currency').value;
         const toCurrency = document.getElementById('cc-to-currency').value;
         const fromAmount = parseFloat(document.getElementById('cc-from-amount').value);
 
         if (isNaN(fromAmount)) {
-            alert('請輸入有效的金額');
+            alert('Empty Amount');
             return;
         }
 
@@ -106,7 +112,7 @@ function convertCurrency() {
         if (convertedAmount !== null) {
             document.getElementById('cc-to-amount').value = convertedAmount.toFixed(2);
         } else {
-            alert('無法轉換所選貨幣');
+            alert('Cannot use this amount');
         }
     });
 }
@@ -122,8 +128,7 @@ function calculateExchangeRate(amount, fromCurrency, toCurrency, rates) {
         return null;
     }
 
-    const hkdAmount = amount / fromRate;
-    return hkdAmount * toRate;
+    return (amount * fromRate) / toRate;
 }
 
 function toggleSavedRates() {
@@ -155,4 +160,22 @@ function toggleSavedRates() {
         savedRatesContainer.style.display = 'none';
         toggleButton.textContent = 'Show Saved Exchange Rates';
     }
+}
+
+// 在獲取匯率的函數中添加存儲邏輯
+function fetchExchangeRate() {
+    fetch('https://api.exchangerate-api.com/v4/latest/USD')
+        .then(response => response.json())
+        .then(data => {
+            const rate = data.rates.TWD;
+            document.getElementById('exchange-rate').textContent = rate.toFixed(2);
+            
+            // 將匯率存儲到 Chrome 存儲中
+            chrome.storage.local.set({ 'usdToTwdRate': rate }, function() {
+                console.log('Exchange rate saved');
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching exchange rate:', error);
+        });
 }

@@ -2,7 +2,7 @@
     "manifest_version": 3,
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwE4fLd2Q43eGPBfzN0blXHmYhYuOM1KUE988Lc7tzq7FVqbY5jeIovy+vL/e9ioFKuKySQcumF0pXe5+6Va1C4pdKo7/DkzNpB3hwx4/TB+NsqhTu94f54VZ6DS0Rbloeve41/8jlQR6uauDXkk0dJZoeqnE8VxrS7UC60DQffjTNiaG0uiiQTr8K7nX6fEmvClcnY4OvHUhAXOvOU3rkaW9n7gR3If8od50fQr/Jggo1RHULjLqsg63k3On36keQ8hB2cZl+xol4+Yurm1UyPL5UHOc9vUxq0ZFFlTvy6Ek5sgXOBmGtqg39uLM4/fhsSZLF2Zh87R1aF0d2GZx4wIDAQAB",
     "name": "貨幣轉換插件",
-    "version": "1.0",
+    "version": "2.0",
     "description": "自動轉換頁面上的貨幣為港幣",
     "permissions": [
         "activeTab",

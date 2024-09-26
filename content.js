@@ -1,5 +1,3 @@
-
-
 // 识别货币和金额的函数
 function ccIdentifyCurrency(text) {
     // 更新正则表达式以匹配包含千位分隔符的数字
@@ -333,4 +331,29 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // 匯率計算函數
 function calculateConvertedAmount(amount, rate) {
     return (amount * rate).toFixed(2);
+}
+
+// 從 Chrome 存儲中獲取匯率
+function getExchangeRate(callback) {
+    chrome.storage.local.get(['usdToTwdRate'], function(result) {
+        if (result.usdToTwdRate) {
+            callback(result.usdToTwdRate);
+        } else {
+            // 如果沒有存儲的匯率，使用默認值或顯示錯誤
+            console.error('Exchange rate not found in storage');
+            callback(30); // 使用默認值，您可以根據需要調整
+        }
+    });
+}
+
+// 修改轉換函數以使用存儲的匯率
+function convertPrice(price) {
+    getExchangeRate(function(rate) {
+        const usdPrice = parseFloat(price.replace('$', ''));
+        const twdPrice = Math.round(usdPrice * rate);
+        const newElement = document.createElement('span');
+        newElement.textContent = ` (約 ${twdPrice} 元)`;
+        newElement.style.color = 'green';
+        price.parentNode.appendChild(newElement);
+    });
 }
