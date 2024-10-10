@@ -5,7 +5,6 @@
     "version": "2.0",
     "description": "自動轉換頁面上的貨幣為港幣",
     "permissions": [
-        "activeTab",
         "storage",
         "alarms"
     ],
